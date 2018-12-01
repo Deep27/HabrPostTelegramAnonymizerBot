@@ -96,10 +96,16 @@
     
 3. Откроем телеграм и создадим аккаунт для нового бота.
     Для этого нам необходимо обратиться за помощью к боту BotFather:
-    * найдем бота в поиске;![botfather/welcome](images/botfather/welcome.jpg)
+    * найдем бота в поиске;
+    
+    ![botfather/welcome](images/botfather/welcome.jpg)
     * выполним команду `/start`;
-    * выполним команду `/newbot`;![botfather/newbot](images/botfather/newbot.jpg)
-    * зададим какое-нибудь имя нашему боту (должно заканчиваться на "Bot"). Я назвал его ExampleOfAnonymizerBot.![botfather/newbot_setname](images/botfather/newbot_setname.jpg)
+    * выполним команду `/newbot`;
+    
+    ![botfather/newbot](images/botfather/newbot.jpg)
+    * зададим какое-нибудь имя нашему боту (должно заканчиваться на "Bot"). Я назвал его ExampleOfAnonymizerBot.
+    
+    ![botfather/newbot_setname](images/botfather/newbot_setname.jpg)
     
     После выполнения этих команд мы получим токен, который нам понадобится для использования Bot API.
     Его нам необходимо сохранить.
