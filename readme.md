@@ -58,7 +58,9 @@
     </project>
     ```
 
-    * `Telegram API` - 
+    * `Telegram API` - [библиотека для работы с Telegram API](https://github.com/rubenlagus/TelegramBots),
+        содержит в себе классы и методы для взаимодействия с сервисами Telegram и некоторые расширения
+        этих классов.
     * `Log4j 2` - хорошие логи лучше чем `sout`. Основные возможности `log4j 2`, которые я использую, это:
         * определение своих уровней логирования и их приоритета;
         * определение своего цвета текста для каждого уровня логирования;
@@ -108,6 +110,66 @@
     ![botfather/newbot_setname](images/botfather/newbot_setname.jpg)
     
     После выполнения этих команд мы получим токен, который нам понадобится для использования Bot API.
-    Его нам необходимо сохранить.
+    (`749430772:AAF54VXPZeGRgFWmjCto-c8EIm7Ydk_VCW0`)
     
+## Реализация
+##### 1. Модель анонимного отправителя сообщений
+
+<details>
+    <summary>Anunymous.java</summary> 
+    
+```java
+package io.example.anonymizerbot.model;
+
+import org.telegram.telegrambots.meta.api.objects.Chat;
+import org.telegram.telegrambots.meta.api.objects.User;
+
+public final class Anonymous {
+
+    private final User mUser;
+    private final Chat mChat;
+    private String mDisplayedName;
+
+    public Anonymous(User user, Chat chat) {
+        mUser = user;
+        mChat = chat;
+    }
+
+    @Override
+    public int hashCode() {
+        return mUser.hashCode();
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        return obj instanceof User && mUser.equals(obj);
+    }
+
+    public User getUser() {
+        return mUser;
+    }
+
+    public Chat getChat() {
+        return mChat;
+    }
+
+    public String getDisplayedName() {
+        return mDisplayedName;
+    }
+
+    public void setDisplayedName(String displayedName) {
+        mDisplayedName = displayedName;
+    }
+} 
+```
+</details> 
+
+##### 2. Интерфейс бота
+Определим команды, на которые наш бот будет реагировать:
+- `/start` - 
+- `/help` - 
+- `/set_name` - 
+- `/my_name` - 
+- `/stop` - 
+
 
