@@ -183,7 +183,7 @@ public final class Anonymous {
 
 В примере для хранения анонимов мы будем использовать `Set<Anonymous>`.
 
-Инкапсулируем эту коллекцию, обернув ее классом `Anonymouses`, добавив методы для манипуляций с элементами.
+Инкапсулируем эту коллекцию, обернув ее классом `Anonymouses`, добавив методы для работы с элементами.
 
 <details>
     <summary>Anunymouses.java</summary> 
@@ -191,46 +191,62 @@ public final class Anonymous {
 ```java
 package io.example.anonymizerbot.model;
 
-import org.telegram.telegrambots.meta.api.objects.Chat;
 import org.telegram.telegrambots.meta.api.objects.User;
 
-public final class Anonymous {
+import java.util.HashSet;
+import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Stream;
 
-    private final User mUser;
-    private final Chat mChat;
-    private String mDisplayedName;
+public final class Anonymouses {
 
-    public Anonymous(User user, Chat chat) {
-        mUser = user;
-        mChat = chat;
+    private final Set<Anonymous> mAnonymouses;
+
+    public Anonymouses() {
+        mAnonymouses = new HashSet<>();
     }
 
-    @Override
-    public int hashCode() {
-        return mUser.hashCode();
+    public boolean setUserDisplayedName(User user, String name) {
+
+        if (isDisplayedNameTaken(name)) {
+            return false;
+        } else {
+            mAnonymouses.stream().filter(a -> a.getUser().equals(user)).forEach(a -> a.setDisplayedName(name));
+            return true;
+        }
     }
 
-    @Override
-    public boolean equals(Object obj) {
-        return obj instanceof User && mUser.equals(obj);
+    public boolean removeUser(User user) {
+        return mAnonymouses.removeIf(a -> a.getUser().equals(user));
     }
 
-    public User getUser() {
-        return mUser;
+    public boolean addAnonymous(Anonymous anonymous) {
+        return mAnonymouses.add(anonymous);
     }
 
-    public Chat getChat() {
-        return mChat;
+    public boolean hasUser(User u) {
+        return mAnonymouses.stream().filter(a -> a.getUser().equals(u)).findFirst().orElse(null) != null;
     }
 
-    public String getDisplayedName() {
-        return mDisplayedName;
+    public String getDisplayedName(User u) {
+
+        Anonymous anonymous = mAnonymouses.stream().filter(a -> a.getUser().equals(u)).findFirst().orElse(null);
+
+        if (anonymous == null) {
+            return null;
+        }
+        return anonymous.getDisplayedName();
     }
 
-    public void setDisplayedName(String displayedName) {
-        mDisplayedName = displayedName;
+    public Stream<Anonymous> anonymouses() {
+        return mAnonymouses.stream();
     }
-} 
+
+    private boolean isDisplayedNameTaken(String name) {
+        return mAnonymouses.stream().anyMatch(a -> Objects.equals(a.getDisplayedName(), name));
+    }
+}
+
 ```
 </details> 
 
