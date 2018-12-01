@@ -72,7 +72,7 @@
     
 ### 2. Настройка log4j2
 Хорошим тоном считается использование в проектах логгеров, а не `System.out.println()`.
-Создадим новый файл `log4j2` в `src/main/java/resources` с именем `log4j2.xml`:
+Создадим новый файл с настройками `log4j2` в `src/main/java/resources` с именем `log4j2.xml`:
 <details>
     <summary>log4j2.xml</summary>
 
@@ -179,7 +179,7 @@ public final class Anonymous {
 ```
 </details> 
 
-### 2. Коллекция анонимов
+### 2. Хранение и манипуляция анонимами
 
 В примере для хранения анонимов мы будем использовать `Set<Anonymous>`.
 
