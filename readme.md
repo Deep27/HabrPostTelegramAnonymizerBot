@@ -124,6 +124,11 @@
 ## Реализация
 ### 1. Модель анонимного отправителя сообщений
 
+Данные, необходиме нам от кажного пользователя:
+- `User mUser` - информация о пользователе Telegram;
+- `Chat mChat` - информация о чате пользователя и бота;
+- `String mDisplayedName` - имя, от которого `mUser` будет посылать сообщения другим пользователям бота.
+
 <details>
     <summary>Anunymous.java</summary> 
     
@@ -173,7 +178,62 @@ public final class Anonymous {
 ```
 </details> 
 
-### 2. Интерфейс бота
+### 2. Коллекция анонимов
+
+В примере для хранения анонимов мы будем использовать `Set<Anonymous>`.
+
+Инкапсулируем эту коллекцию, обернув ее классом `Anonymouses`, добавив методы для манипуляций с элементами.
+
+<details>
+    <summary>Anunymouses.java</summary> 
+    
+```java
+package io.example.anonymizerbot.model;
+
+import org.telegram.telegrambots.meta.api.objects.Chat;
+import org.telegram.telegrambots.meta.api.objects.User;
+
+public final class Anonymous {
+
+    private final User mUser;
+    private final Chat mChat;
+    private String mDisplayedName;
+
+    public Anonymous(User user, Chat chat) {
+        mUser = user;
+        mChat = chat;
+    }
+
+    @Override
+    public int hashCode() {
+        return mUser.hashCode();
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        return obj instanceof User && mUser.equals(obj);
+    }
+
+    public User getUser() {
+        return mUser;
+    }
+
+    public Chat getChat() {
+        return mChat;
+    }
+
+    public String getDisplayedName() {
+        return mDisplayedName;
+    }
+
+    public void setDisplayedName(String displayedName) {
+        mDisplayedName = displayedName;
+    }
+} 
+```
+</details> 
+
+### 3. Интерфейс бота
 Определим команды, на которые наш бот будет реагировать:
 - `/start` - 
 - `/help` - 
