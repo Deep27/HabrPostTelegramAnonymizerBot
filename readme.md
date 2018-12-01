@@ -183,7 +183,7 @@ public final class Anonymous {
 
 В примере для хранения анонимов мы будем использовать `Set<Anonymous>`.
 
-Инкапсулируем эту коллекцию, обернув ее классом `Anonymouses`, добавив методы для работы с элементами.
+Обернем эту коллекцию классом `Anonymouses`, добавив методы для работы с элементами.
 
 <details>
     <summary>Anunymouses.java</summary> 
@@ -225,7 +225,7 @@ public final class Anonymouses {
     }
 
     public boolean hasUser(User u) {
-        return mAnonymouses.stream().filter(a -> a.getUser().equals(u)).findFirst().orElse(null) != null;
+        return mAnonymouses.stream().anyMatch(a -> a.getUser().equals(u));
     }
 
     public String getDisplayedName(User u) {
