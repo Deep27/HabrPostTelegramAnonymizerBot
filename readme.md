@@ -81,8 +81,8 @@
 <Configuration status="WARN">
 
     <CustomLevels>
-        <CustomLevel name="QUERY_STRANGE" intLevel="360"/>
-        <CustomLevel name="QUERY_SUCCESS" intLevel="340"/>
+        <CustomLevel name="STRANGE" intLevel="360"/>
+        <CustomLevel name="SUCCESS" intLevel="340"/>
     </CustomLevels>
 
     <Appenders>
@@ -99,8 +99,8 @@
 
     <Root>
         <Appender ref="Console"/>
-    </Root> 
- 
+    </Root>
+
 </Configuration> 
 ```
 Информацию о настройке и использовании `log4j2` можно найти в [официальной документации](https://logging.apache.org/log4j/2.x/).
@@ -157,7 +157,7 @@ public final class Anonymous {
 
     @Override
     public boolean equals(Object obj) {
-        return obj instanceof User && mUser.equals(obj);
+        return obj instanceof Anonymous && ((Anonymous) obj).getUser().equals(mUser);
     }
 
     public User getUser() {
@@ -245,8 +245,7 @@ public final class Anonymouses {
     private boolean isDisplayedNameTaken(String name) {
         return mAnonymouses.stream().anyMatch(a -> Objects.equals(a.getDisplayedName(), name));
     }
-}
-
+} 
 ```
 </details> 
 
