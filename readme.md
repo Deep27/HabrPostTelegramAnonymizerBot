@@ -649,6 +649,8 @@ public final class StopCommand extends AnonymizerCommand {
 
 </br>
 
+### 3. Инициализация и запуск бота
+
 Класс бота, в котором производится регистрация всех кастомных команд, обработчика сообщений-не команд
 и неизвестных команд.
 
@@ -828,7 +830,7 @@ public final class AnonymizerBot extends TelegramLongPollingCommandBot {
 ```
 </details>
 
-</br>
+</br> 
 
 Наконец, запуск нашего бота:
 
@@ -886,4 +888,5 @@ public final class BotInitializer {
 
 </br>
 
+### 4. Пример использования
 
