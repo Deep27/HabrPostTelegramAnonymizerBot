@@ -649,6 +649,9 @@ public final class StopCommand extends AnonymizerCommand {
 
 </br>
 
+Класс бота, в котором производится регистрация всех кастомных команд, обработчика сообщений-не команд
+и неизвестных команд.
+
 <details>
     <summary>AnonymizerBot.java</summary>
     
@@ -677,7 +680,7 @@ public final class AnonymizerBot extends TelegramLongPollingCommandBot {
 
     private static final Logger LOG = LogManager.getLogger(AnonymizerBot.class);
     
-    // имя бота, которое мы указали при создани аккаунта у BotFather
+    // имя бота, которое мы указали при создании аккаунта у BotFather
     // и токен, который получили в результате 
     private static final String BOT_NAME = "AnonymizerBotExample";
     private static final String BOT_TOKEN = "749430772:AAF54VXPZeGRgFWmjCto-c8EIm7Ydk_VCW0";
@@ -693,6 +696,7 @@ public final class AnonymizerBot extends TelegramLongPollingCommandBot {
         LOG.info("Initializing anonymouses list...");
         mAnonymouses = new Anonymouses();
 
+        // регистрация всех кастомных команд
         LOG.info("Registering commands...");
         LOG.info("Registering '/start'...");
         register(new StartCommand(mAnonymouses));
@@ -706,6 +710,7 @@ public final class AnonymizerBot extends TelegramLongPollingCommandBot {
         LOG.info("Registering '/help'...");
         register(helpCommand);
 
+        // обработка неизвестной команды
         LOG.info("Registering default action'...");
         registerDefaultAction(((absSender, message) -> {
 
@@ -730,6 +735,7 @@ public final class AnonymizerBot extends TelegramLongPollingCommandBot {
         return BOT_TOKEN;
     }
 
+    // обработка сообщения не начинающегося с '/'
     @Override
     public void processNonCommandUpdate(Update update) {
 
@@ -753,11 +759,14 @@ public final class AnonymizerBot extends TelegramLongPollingCommandBot {
         String messageForUsers = String.format("%s:\n%s", mAnonymouses.getDisplayedName(user), msg.getText());
 
         SendMessage answer = new SendMessage();
+        
+        // отправка ответа отправителю о том, что его сообщение получено
         answer.setText(clearMessage);
         answer.setChatId(msg.getChatId());
         replyToUser(answer, user, clearMessage);
 
 
+        // отправка сообщения всем остальным пользователям бота
         answer.setText(messageForUsers);
         Stream<Anonymous> anonymouses = mAnonymouses.anonymouses();
         anonymouses.filter(a -> !a.getUser().equals(user))
@@ -767,6 +776,7 @@ public final class AnonymizerBot extends TelegramLongPollingCommandBot {
                 });
     }
 
+    // проверка корректности сообщения пользователя
     private boolean canSendMessage(User user, Message msg) {
 
         SendMessage answer = new SendMessage();
@@ -820,6 +830,8 @@ public final class AnonymizerBot extends TelegramLongPollingCommandBot {
 
 </br>
 
+Наконец, запуск нашего бота:
+
 <details>
     <summary>BotInitializer.java</summary>
     
@@ -839,7 +851,8 @@ public final class BotInitializer {
 
     private static final Logger LOG = LogManager.getLogger(BotInitializer.class);
 
-    private final static String PROXY_HOST = "80.11.200.161";
+    // настройки прокси
+    private final static String PROXY_HOST = "xxx.xxx.xxx.xxx";
     private final static int PROXY_PORT = 9999;
 
     public static void main(String[] args) {
