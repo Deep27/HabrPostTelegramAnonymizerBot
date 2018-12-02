@@ -396,7 +396,6 @@ public final class StartCommand extends AnonymizerCommand {
 </br>
 
 - `/help` - выведет пользователю информацию обо всех доступных командах;
-
 <details>
     <summary>HelpCommand.java</summary>
     
@@ -441,8 +440,7 @@ public final class HelpCommand extends AnonymizerCommand {
 
 </br>
 
-- `/set_name` - задаст пользователю имя, от которого будут отправляться анонимные сообщения;
-
+- `/set_name` - задаст пользователю имя, от которого будут отправляться анонимные сообщения; 
 <details>
     <summary>SetNameCommand.java</summary>
     
@@ -527,8 +525,7 @@ public final class SetNameCommand extends AnonymizerCommand {
 
 </br>
 
-- `/my_name` - отобразит текущее имя пользователя;
-
+- `/my_name` - отобразит текущее имя пользователя; 
 <details>
     <summary>MyNameCommand.java</summary>
     
@@ -588,8 +585,7 @@ public final class MyNameCommand extends AnonymizerCommand {
 
 </br>
 
-- `/stop` - удалит пользователя из коллекции анонимусов.
-
+- `/stop` - удалит пользователя из коллекции анонимусов. 
 <details>
     <summary>StopCommand.java</summary>
     
