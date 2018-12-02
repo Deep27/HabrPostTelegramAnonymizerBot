@@ -295,6 +295,8 @@ abstract class AnonymizerCommand extends BotCommand {
 ``` 
 </details>
 
+</br>
+
 В методах логгера используются уровни (`Level`) и шаблоны сообщений (`LogTemplate`):
 <details>
     <summary>LogLevel.java</summary>
