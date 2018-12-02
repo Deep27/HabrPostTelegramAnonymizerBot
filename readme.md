@@ -341,7 +341,7 @@ public final class LogTemplate {
 </br>
 
 Определим команды, на которые наш бот будет реагировать:
-- `/start` - создаст нового `Anonymous` без имени и добавит его в коллекию `Anonymouses`;
+- `/start` - создаст нового `Anonymous` без имени и добавит его в коллекцию `Anonymouses`;
 <details>
     <summary>StartCommand.java</summary>
     
@@ -395,9 +395,250 @@ public final class StartCommand extends AnonymizerCommand {
 
 </br>
 
-- `/help` - 
-- `/set_name` - 
-- `/my_name` - 
-- `/stop` - 
+- `/help` - выведет пользователю информацию обо всех доступных командах;
+
+<details>
+    <summary>HelpCommand.java</summary>
+    
+```java
+package io.example.anonymizerbot.command;
+
+import io.example.anonymizerbot.logger.LogTemplate;
+import org.telegram.telegrambots.extensions.bots.commandbot.commands.ICommandRegistry;
+import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
+import org.telegram.telegrambots.meta.api.objects.Chat;
+import org.telegram.telegrambots.meta.api.objects.User;
+import org.telegram.telegrambots.meta.bots.AbsSender;
+
+public final class HelpCommand extends AnonymizerCommand {
+
+    private final ICommandRegistry mCommandRegistry;
+
+    public HelpCommand(ICommandRegistry commandRegistry) {
+        super("help", "list all known commands\n");
+        mCommandRegistry = commandRegistry;
+    }
+
+    @Override
+    public void execute(AbsSender absSender, User user, Chat chat, String[] strings) {
+
+        log.info(LogTemplate.COMMAND_PROCESSING, user.getId(), getCommandIdentifier());
+
+        StringBuilder helpMessageBuilder = new StringBuilder("<b>Available commands:</b>\n\n");
+
+        mCommandRegistry.getRegisteredCommands().forEach(cmd -> helpMessageBuilder.append(cmd.toString()).append("\n"));
+
+        SendMessage helpMessage = new SendMessage();
+        helpMessage.setChatId(chat.getId().toString());
+        helpMessage.enableHtml(true);
+        helpMessage.setText(helpMessageBuilder.toString());
+
+        execute(absSender, helpMessage, user);
+    }
+} 
+```
+</details>
+
+</br>
+
+- `/set_name` - задаст пользователю имя, от которого будут отправляться анонимные сообщения;
+
+<details>
+    <summary>SetNameCommand.java</summary>
+    
+```java
+package io.example.anonymizerbot.command;
+
+import io.example.anonymizerbot.logger.LogLevel;
+import io.example.anonymizerbot.logger.LogTemplate;
+import io.example.anonymizerbot.model.Anonymouses;
+import org.apache.logging.log4j.Level;
+import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
+import org.telegram.telegrambots.meta.api.objects.Chat;
+import org.telegram.telegrambots.meta.api.objects.User;
+import org.telegram.telegrambots.meta.bots.AbsSender;
+
+public final class SetNameCommand extends AnonymizerCommand {
+
+    private final Anonymouses mAnonymouses;
+
+    public SetNameCommand(Anonymouses anonymouses) {
+        super("set_name", "set or change name that will be displayed with your messages\n");
+        mAnonymouses = anonymouses;
+    }
+
+    @Override
+    public void execute(AbsSender absSender, User user, Chat chat, String[] strings) {
+
+        log.info(LogTemplate.COMMAND_PROCESSING, user.getId(), getCommandIdentifier());
+
+        SendMessage message = new SendMessage();
+        message.setChatId(chat.getId().toString());
+
+        if (!mAnonymouses.hasAnonymous(user)) {
+            log.log(Level.getLevel(LogLevel.STRANGE), "User {} is trying to execute '{}' without starting the bot!", user.getId(), getCommandIdentifier());
+            message.setText("Firstly you should start the bot! Execute '/start' command!");
+            execute(absSender, message, user);
+            return;
+        }
+
+        String displayedName = getName(strings);
+
+        if (displayedName == null) {
+            log.log(Level.getLevel(LogLevel.STRANGE), "User {} is trying to set empty name.", user.getId());
+            message.setText("You should use non-empty name!");
+            execute(absSender, message, user);
+            return;
+        }
+
+        StringBuilder sb = new StringBuilder();
+
+        if (mAnonymouses.setUserDisplayedName(user, displayedName)) {
+
+            if (mAnonymouses.getDisplayedName(user) == null) {
+                log.info("User {} set a name '{}'", user.getId(), displayedName);
+                sb.append("Your displayed name: '").append(displayedName)
+                        .append("'. Now you can send messages to bot!");
+            } else {
+                log.info("User {} has changed name to '{}'", user.getId(), displayedName);
+                sb.append("Your new displayed name: '").append(displayedName).append("'.");
+            }
+        } else {
+            log.log(Level.getLevel(LogLevel.STRANGE), "User {} is trying to set taken name '{}'", user.getId(), displayedName);
+            sb.append("Name ").append(displayedName).append(" is already in use! Choose another name!");
+        }
+
+        message.setText(sb.toString());
+        execute(absSender, message, user);
+    }
+
+    private String getName(String[] strings) {
+
+        if (strings == null || strings.length == 0) {
+            return null;
+        }
+
+        String name = String.join(" ", strings);
+        return name.replaceAll(" ", "").length() == 0 ? null : name;
+    }
+} 
+```
+</details>
+
+</br>
+
+- `/my_name` - отобразит текущее имя пользователя;
+
+<details>
+    <summary>MyNameCommand.java</summary>
+    
+```java
+package io.example.anonymizerbot.command;
+
+import io.example.anonymizerbot.logger.LogLevel;
+import io.example.anonymizerbot.logger.LogTemplate;
+import io.example.anonymizerbot.model.Anonymouses;
+import org.apache.logging.log4j.Level;
+import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
+import org.telegram.telegrambots.meta.api.objects.Chat;
+import org.telegram.telegrambots.meta.api.objects.User;
+import org.telegram.telegrambots.meta.bots.AbsSender;
+
+public final class MyNameCommand extends AnonymizerCommand {
+
+    private final Anonymouses mAnonymouses;
+
+    public MyNameCommand(Anonymouses anonymouses) {
+        super("my_name", "show your current name that will be displayed with your messages\n");
+        mAnonymouses = anonymouses;
+    }
+
+    @Override
+    public void execute(AbsSender absSender, User user, Chat chat, String[] strings) {
+
+        log.info(LogTemplate.COMMAND_PROCESSING, user.getId(), getCommandIdentifier());
+
+        StringBuilder sb = new StringBuilder();
+
+        SendMessage message = new SendMessage();
+        message.setChatId(chat.getId().toString());
+
+        if (!mAnonymouses.hasAnonymous(user)) {
+
+            sb.append("You are not in bot users' list! Send /start command!");
+            log.log(Level.getLevel(LogLevel.STRANGE), "User {} is trying to execute '{}' without starting the bot.", user.getId(), getCommandIdentifier());
+
+        } else if(mAnonymouses.getDisplayedName(user) == null) {
+
+            sb.append("Currently you don't have a name.\nSet it using command:\n'/set_name <displayed_name>'");
+            log.log(Level.getLevel(LogLevel.STRANGE), "User {} is trying to execute '{}' without having a name.", user.getId(), getCommandIdentifier());
+
+        } else {
+
+            log.info("User {} is executing '{}'. Name is '{}'.", user.getId(), getCommandIdentifier(), mAnonymouses.getDisplayedName(user));
+            sb.append("Your current name: ").append(mAnonymouses.getDisplayedName(user));
+        }
+
+        message.setText(sb.toString());
+        execute(absSender, message, user);
+    }
+} 
+```
+</details>
+
+</br>
+
+- `/stop` - удалит пользователя из коллекции анонимусов.
+
+<details>
+    <summary>StopCommand.java</summary>
+    
+```java
+package io.example.anonymizerbot.command;
+
+import io.example.anonymizerbot.logger.LogLevel;
+import io.example.anonymizerbot.logger.LogTemplate;
+import io.example.anonymizerbot.model.Anonymouses;
+import org.apache.logging.log4j.Level;
+import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
+import org.telegram.telegrambots.meta.api.objects.Chat;
+import org.telegram.telegrambots.meta.api.objects.User;
+import org.telegram.telegrambots.meta.bots.AbsSender;
+
+public final class StopCommand extends AnonymizerCommand {
+
+    private final Anonymouses mAnonymouses;
+
+    public StopCommand(Anonymouses anonymouses) {
+        super("stop", "remove yourself from bot users' list\n");
+        mAnonymouses = anonymouses;
+    }
+
+    @Override
+    public void execute(AbsSender absSender, User user, Chat chat, String[] strings) {
+
+        log.info(LogTemplate.COMMAND_PROCESSING, user.getId(), getCommandIdentifier());
+
+        StringBuilder sb = new StringBuilder();
+
+        SendMessage message = new SendMessage();
+        message.setChatId(chat.getId().toString());
+
+        if (mAnonymouses.removeAnonymous(user)) {
+            log.info("User {} has been removed from users list!", user.getId());
+            sb.append("You've been removed from bot's users list! Bye!");
+        } else {
+            log.log(Level.getLevel(LogLevel.STRANGE), "User {} is trying to execute '{}' without having executed 'start' before!", user.getId(), getCommandIdentifier());
+            sb.append("You were not in bot users' list. Bye!");
+        }
+
+        message.setText(sb.toString());
+        execute(absSender, message, user);
+    }
+} 
+```
+</details>
+
+</br>
 
 
