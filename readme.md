@@ -87,12 +87,12 @@
 
     <Appenders>
         <Console name="Console" target="SYSTEM_OUT">
-            <PatternLayout pattern="%highlight{%d{HH:mm:ss} [%t] %-5level %logger{36} - %msg%n}{STRANGE_USER=bright yellow bold, SUCCESS_USER=bright green bold}"/>
+            <PatternLayout pattern="%highlight{%d{HH:mm:ss} [%t] %-5level %logger{36} - %msg%n}{STRANGE=bright yellow bold, SUCCESS=bright green bold}"/>
         </Console>
     </Appenders>
 
     <Loggers>
-        <Logger name="io.example.anonymizerbot" level="info" additivity="false">
+        <Logger name="io.deep27soft.deepanonymizerbot" level="info" additivity="false">
             <AppenderRef ref="Console"/>
         </Logger>
     </Loggers>
@@ -101,7 +101,7 @@
         <Appender ref="Console"/>
     </Root>
 
-</Configuration> 
+</Configuration>
 ```
 Информацию о настройке и использовании `log4j2` можно найти в [официальной документации](https://logging.apache.org/log4j/2.x/).
 </details>
@@ -179,6 +179,8 @@ public final class Anonymous {
 
 ```
 </details> 
+
+</br>
 
 Обернем ее в `Anonymouses`, добавив несколько нужных методов для работы с анонимами:
 <details>
