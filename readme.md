@@ -136,61 +136,6 @@
 ```java
 package io.example.anonymizerbot.model;
 
-import org.telegram.telegrambots.meta.api.objects.Chat;
-import org.telegram.telegrambots.meta.api.objects.User;
-
-public final class Anonymous {
-
-    private final User mUser;
-    private final Chat mChat;
-    private String mDisplayedName;
-
-    public Anonymous(User user, Chat chat) {
-        mUser = user;
-        mChat = chat;
-    }
-
-    @Override
-    public int hashCode() {
-        return mUser.hashCode();
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        return obj instanceof Anonymous && ((Anonymous) obj).getUser().equals(mUser);
-    }
-
-    public User getUser() {
-        return mUser;
-    }
-
-    public Chat getChat() {
-        return mChat;
-    }
-
-    public String getDisplayedName() {
-        return mDisplayedName;
-    }
-
-    public void setDisplayedName(String displayedName) {
-        mDisplayedName = displayedName;
-    }
-} 
-```
-</details> 
-
-### 2. Хранение и манипуляция анонимами
-
-В примере для хранения анонимов мы будем использовать `Set<Anonymous>`.
-
-Обернем эту коллекцию классом `Anonymouses`, добавив методы для работы с элементами.
-
-<details>
-    <summary>Anunymouses.java</summary> 
-    
-```java
-package io.example.anonymizerbot.model;
-
 import org.telegram.telegrambots.meta.api.objects.User;
 
 import java.util.HashSet;
@@ -216,7 +161,7 @@ public final class Anonymouses {
         }
     }
 
-    public boolean removeUser(User user) {
+    public boolean removeAnonymous(User user) {
         return mAnonymouses.removeIf(a -> a.getUser().equals(user));
     }
 
@@ -224,7 +169,7 @@ public final class Anonymouses {
         return mAnonymouses.add(anonymous);
     }
 
-    public boolean hasUser(User u) {
+    public boolean hasAnonymous(User u) {
         return mAnonymouses.stream().anyMatch(a -> a.getUser().equals(u));
     }
 
@@ -242,16 +187,118 @@ public final class Anonymouses {
         return mAnonymouses.stream();
     }
 
+
     private boolean isDisplayedNameTaken(String name) {
         return mAnonymouses.stream().anyMatch(a -> Objects.equals(a.getDisplayedName(), name));
     }
-} 
+}
 ```
 </details> 
 
-### 3. Интерфейс бота
+### 2. Интерфейс бота
+
+Любая кастомная команда должна наследоваться от `BotCommand` и реализовывать метод
+`execute(AbsSender sender, User user, Chat chat, String[] strings)`, который исползуется для обработки команд пользователей.
+
+После того как мы обработаем команду пользователя, мы можем послать ему ответ, используя метод `execute` класса`AbsSender`,
+который принимает на вход вышеупомянутый `execute(AbsSender sender, User user, Chat chat, String[] strings)`.
+
+Здесь и далее чтобы не оборачивать каждый раз метод `AbsSender.execute`, который может выбросить исключение `TelegramApiException`,
+в `try-catch`, и для того чтобы не прописывать в каждой команде вывод однообразных логов,
+создадим класс `AnonymizerCommand`, а наши кастомные комады будем уже наследовать от него (про обработку исключений в этом примере забудем):
+
+<details>
+    <summary>AnonymizerCommand.java</summary>
+    
+```java
+package io.example.anonymizerbot.command;
+
+import io.example.anonymizerbot.logger.LogLevel;
+import io.example.anonymizerbot.logger.LogTemplate;
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.telegram.telegrambots.extensions.bots.commandbot.commands.BotCommand;
+import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
+import org.telegram.telegrambots.meta.api.objects.User;
+import org.telegram.telegrambots.meta.bots.AbsSender;
+import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
+
+abstract class AnonymizerCommand extends BotCommand {
+
+    final Logger log = LogManager.getLogger(getClass());
+
+    AnonymizerCommand(String commandIdentifier, String description) {
+        super(commandIdentifier, description);
+    }
+
+    void execute(AbsSender sender, SendMessage message, User user) {
+        try {
+            sender.execute(message);
+            log.log(Level.getLevel(LogLevel.SUCCESS), LogTemplate.COMMAND_SUCCESS, user.getId(), getCommandIdentifier());
+        } catch (TelegramApiException e) {
+            log.error(LogTemplate.COMMAND_EXCEPTION, user.getId(), getCommandIdentifier(), e);
+        }
+    }
+} 
+``` 
+</details>
+
 Определим команды, на которые наш бот будет реагировать:
-- `/start` - 
+- `/start` - создаст нового `Anonymous` без имени и добавит его в коллекию `Anonymouses`;
+<details>
+    <summary>StartCommand.java</summary>
+    
+```java
+package io.example.anonymizerbot.command;
+
+import io.example.anonymizerbot.logger.LogLevel;
+import io.example.anonymizerbot.logger.LogTemplate;
+import io.example.anonymizerbot.model.Anonymous;
+import io.example.anonymizerbot.model.Anonymouses;
+import org.apache.logging.log4j.Level;
+import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
+import org.telegram.telegrambots.meta.api.objects.Chat;
+import org.telegram.telegrambots.meta.api.objects.User;
+import org.telegram.telegrambots.meta.bots.AbsSender;
+
+public final class StartCommand extends AnonymizerCommand {
+
+    private final Anonymouses mAnonymouses;
+
+    public StartCommand(Anonymouses anonymouses) {
+        super("start", "start using bot\n");
+        mAnonymouses = anonymouses;
+    }
+
+    @Override
+    public void execute(AbsSender absSender, User user, Chat chat, String[] strings) {
+
+        log.info(LogTemplate.COMMAND_PROCESSING, user.getId(), getCommandIdentifier());
+
+        StringBuilder sb = new StringBuilder();
+
+        SendMessage message = new SendMessage();
+        message.setChatId(chat.getId().toString());
+
+        if (mAnonymouses.addAnonymous(new Anonymous(user, chat))) {
+            log.info("User {} is trying to execute '{}' the first time. Added to users' list.", user.getId(), getCommandIdentifier());
+            sb.append("Hi, ").append(user.getUserName()).append("! You've been added to bot users' list!\n")
+                    .append("Please execute command:\n'/set_name <displayed_name>'\nwhere <displayed_name> is the name you want to use to hide your real name.");
+        } else {
+            log.log(Level.getLevel(LogLevel.STRANGE), "User {} has already executed '{}'. Is he trying to do it one more time?", user.getId(), getCommandIdentifier());
+            sb.append("You've already started bot! You can send messages if you set your name (/set_name).");
+        }
+
+        message.setText(sb.toString());
+        execute(absSender, message, user);
+    }
+}
+
+
+``` 
+</details> 
+
 - `/help` - 
 - `/set_name` - 
 - `/my_name` - 
