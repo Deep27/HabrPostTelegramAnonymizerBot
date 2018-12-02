@@ -888,5 +888,5 @@ public final class BotInitializer {
 
 </br>
 
-### 4. Пример использования
+## Пример использования
 
