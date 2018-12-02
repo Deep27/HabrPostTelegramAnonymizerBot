@@ -182,7 +182,7 @@ public final class Anonymous {
 
 </br>
 
-Обернем ее в `Anonymouses`, добавив несколько нужных методов для работы с анонимами:
+Обернем модель в `Anonymouses`, добавив несколько нужных методов для работы с анонимами:
 <details>
     <summary>Anonymouses.java</summary> 
     
@@ -325,7 +325,7 @@ package io.example.anonymizerbot.logger;
 public final class LogTemplate {
 
     public static final String MESSAGE_EXCEPTION = "User {} has caused an exception while sending message!";
-    public static final String MESSAGE_PROCESSING = "User {} has received message from another user {}.";
+    public static final String MESSAGE_PROCESSING = "Precessing user {}'s message.";
     public static final String MESSAGE_RECEIVED = "User {} has received message from another user {}.";
     public static final String MESSAGE_LOST = "User {} did not get message from another user {}.";
 
