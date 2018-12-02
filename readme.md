@@ -391,6 +391,8 @@ public final class StartCommand extends AnonymizerCommand {
 ``` 
 </details> 
 
+</br>
+
 - `/help` - 
 - `/set_name` - 
 - `/my_name` - 
