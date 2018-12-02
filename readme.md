@@ -125,13 +125,13 @@
 ## Реализация
 ### 1. Модель анонимного отправителя сообщений
 
-Данные, необходиме нам от кажного пользователя:
+Данные, необходимые нам от кажного пользователя:
 - `User mUser` - информация о пользователе Telegram;
 - `Chat mChat` - информация о чате пользователя и бота;
-- `String mDisplayedName` - имя, от которого `mUser` будет посылать сообщения другим пользователям бота.
+- `String mDisplayedName` - имя, от которого пользователь будет посылать сообщения другим пользователям бота.
 
 <details>
-    <summary>Anunymous.java</summary> 
+    <summary>Anonymous.java</summary> 
     
 ```java
 package io.example.anonymizerbot.model;
@@ -198,14 +198,14 @@ public final class Anonymouses {
 ### 2. Интерфейс бота
 
 Любая кастомная команда должна наследоваться от `BotCommand` и реализовывать метод
-`execute(AbsSender sender, User user, Chat chat, String[] strings)`, который исползуется для обработки команд пользователей.
+`execute(AbsSender sender, User user, Chat chat, String[] strings)`, который используется для обработки команд пользователей.
 
 После того как мы обработаем команду пользователя, мы можем послать ему ответ, используя метод `execute` класса`AbsSender`,
 который принимает на вход вышеупомянутый `execute(AbsSender sender, User user, Chat chat, String[] strings)`.
 
 Здесь и далее чтобы не оборачивать каждый раз метод `AbsSender.execute`, который может выбросить исключение `TelegramApiException`,
 в `try-catch`, и для того чтобы не прописывать в каждой команде вывод однообразных логов,
-создадим класс `AnonymizerCommand`, а наши кастомные комады будем уже наследовать от него (про обработку исключений в этом примере забудем):
+создадим класс `AnonymizerCommand`, а наши кастомные комады будем уже наследовать от него (обработку исключений в этом примере оставим):
 
 <details>
     <summary>AnonymizerCommand.java</summary>
@@ -242,6 +242,45 @@ abstract class AnonymizerCommand extends BotCommand {
     }
 } 
 ``` 
+</details>
+
+В методах логгера используются уровни (`Level`) и шаблоны сообщений (`LogTemplate`):
+<details>
+    <summary>LogLevel.java</summary>
+    
+```java
+package io.example.anonymizerbot.logger;
+
+public final class LogLevel {
+
+    public static final String STRANGE = "STRANGE";
+    public static final String SUCCESS = "SUCCESS";
+
+    private LogLevel() {}
+} 
+```
+</details>
+
+<details>
+    <summary>LogTemplate.java</summary>
+    
+```java
+package io.example.anonymizerbot.logger;
+
+public final class LogTemplate {
+
+    public static final String MESSAGE_EXCEPTION = "User {} has caused an exception while sending message!";
+    public static final String MESSAGE_PROCESSING = "User {} has received message from another user {}.";
+    public static final String MESSAGE_RECEIVED = "User {} has received message from another user {}.";
+    public static final String MESSAGE_LOST = "User {} did not get message from another user {}.";
+
+    public static final String COMMAND_PROCESSING = "User {} is executing '{}' command...";
+    public static final String COMMAND_SUCCESS = "User {} has successfully executed '{}' command.";
+    public static final String COMMAND_EXCEPTION = "User {} command '{}' has caused an exception!";
+
+    private LogTemplate() {}
+} 
+```
 </details>
 
 Определим команды, на которые наш бот будет реагировать:
@@ -293,9 +332,7 @@ public final class StartCommand extends AnonymizerCommand {
         message.setText(sb.toString());
         execute(absSender, message, user);
     }
-}
-
-
+} 
 ``` 
 </details> 
 
