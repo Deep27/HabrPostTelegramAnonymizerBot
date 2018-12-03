@@ -110,7 +110,7 @@
 Для этого нам необходимо обратиться за помощью к боту BotFather:
 * найдем бота в поиске;
 
-![botfather/welcome](images/botfather/welcome.jpg)     </details>
+![botfather/welcome](images/botfather/welcome.jpg)
 * выполним команду `/start`;
 * выполним команду `/newbot`;
 
@@ -685,7 +685,7 @@ public final class AnonymizerBot extends TelegramLongPollingCommandBot {
     // имя бота, которое мы указали при создании аккаунта у BotFather
     // и токен, который получили в результате 
     private static final String BOT_NAME = "AnonymizerBotExample";
-    private static final String BOT_TOKEN = "749430772:AAF54VXPZeGRgFWmjCto-c8EIm7Ydk_VCW0";
+    private static final String BOT_TOKEN = "7xxxxxxx2:Axxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx0";
 
     private final Anonymouses mAnonymouses;
 
@@ -778,7 +778,7 @@ public final class AnonymizerBot extends TelegramLongPollingCommandBot {
                 });
     }
 
-    // проверка корректности сообщения пользователя
+    // несколько проверок, чтобы можно былдо отправлять сообщения другим пользователям
     private boolean canSendMessage(User user, Message msg) {
 
         SendMessage answer = new SendMessage();
@@ -825,14 +825,13 @@ public final class AnonymizerBot extends TelegramLongPollingCommandBot {
             LOG.error(LogTemplate.MESSAGE_EXCEPTION, user.getId(), e);
         }
     }
-}
-
+} 
 ```
 </details>
 
 </br> 
 
-Наконец, запуск нашего бота:
+Наконец, запуск бота:
 
 <details>
     <summary>BotInitializer.java</summary>
@@ -853,7 +852,7 @@ public final class BotInitializer {
 
     private static final Logger LOG = LogManager.getLogger(BotInitializer.class);
 
-    // настройки прокси
+    // адрес прокси
     private final static String PROXY_HOST = "xxx.xxx.xxx.xxx";
     private final static int PROXY_PORT = 9999;
 
@@ -866,9 +865,9 @@ public final class BotInitializer {
 
             TelegramBotsApi botsApi = new TelegramBotsApi();
 
+            // из настроек нужны только настройки прокси
             LOG.info("Configuring bot options...");
-            DefaultBotOptions botOptions = ApiContext.getInstance(DefaultBotOptions.class);
-
+            DefaultBotOptions botOptions = ApiContext.getInstance(DefaultBotOptions.class); 
             botOptions.setProxyHost(PROXY_HOST);
             botOptions.setProxyPort(PROXY_PORT);
             botOptions.setProxyType(DefaultBotOptions.ProxyType.SOCKS4);
@@ -888,5 +887,24 @@ public final class BotInitializer {
 
 </br>
 
+Вот и все! Бот готов к первым тестам.
+
 ## Пример использования
 
+В качестве примера рассмотрим следующий сценарий:
+1. 'A' начинает работу с ботом (`/start`);
+2. 'A' пытается отправить сообщение;
+3. 'A' пытается задать имя (`/set_name`);
+4. 'A' задает имя (`/set_name Pendalf`);
+5. 'A' посылает сообщение другим пользователям (которых нет);
+6. 'B' начинает работу с ботом (`/start`);
+7. 'B' задает имя (`/set_name Chuck Norris`);
+8. 'B' посылает сообщение другим пользователям;
+9. 'A' видит сообщение от 'B' и посылает сообщение в ответ;
+10. 'B' видит ответ от 'A' и больше ему не пишет...
+
+![bot/pendalf](images/anonymizerbot/pendalf.jpg)
+![bot/chuck_norris](images/anonymizerbot/chuck.jpg)
+
+Ну и куда же без логов:
+![bot/logs](images/anonymizerbot/bot_log.png)
