@@ -217,10 +217,10 @@ public final class Anonymouses {
 
         if (isDisplayedNameTaken(name)) {
             return false;
-        } else {
-            mAnonymouses.stream().filter(a -> a.getUser().equals(user)).forEach(a -> a.setDisplayedName(name));
-            return true;
         }
+        
+        mAnonymouses.stream().filter(a -> a.getUser().equals(user)).forEach(a -> a.setDisplayedName(name));
+        return true;
     }
 
     public boolean removeAnonymous(User user) {
