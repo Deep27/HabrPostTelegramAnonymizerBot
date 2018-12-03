@@ -213,7 +213,7 @@ public final class Anonymouses {
         mAnonymouses = new HashSet<>();
     }
 
-    public boolean setUserDisplayedName(User user, String name) {
+    public boolean setUserDisplayedName(User user, String name) { 
 
         if (isDisplayedNameTaken(name)) {
             return false;
@@ -267,7 +267,7 @@ public final class Anonymouses {
 
 Здесь и далее чтобы не оборачивать каждый раз метод `AbsSender.execute`, который может выбросить исключение `TelegramApiException`,
 в `try-catch`, и для того чтобы не прописывать в каждой команде вывод однообразных логов,
-создадим класс `AnonymizerCommand`, а наши кастомные комады будем уже наследовать от него (обработку исключений в этом примере оставим):
+создадим класс `AnonymizerCommand`, а наши кастомные команды будем уже наследовать от него (обработку исключений в этом примере оставим):
 
 <details>
     <summary>AnonymizerCommand.java</summary>
