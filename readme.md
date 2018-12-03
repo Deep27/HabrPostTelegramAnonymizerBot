@@ -1,6 +1,15 @@
 Каждый разработчик (и не только), который использует Telegram в повседневной жизни, хотя бы раз задумывался о том,
 каково это - создать своего бота, на сколько это сложно и какой язык программирования лучше использовать?
 
+На все эти вопросы могу дать самый простой (и, наверно, самый правильный) ответ: все зависит от вас самих, ваших знаний и намерений.
+
+...Но в этой небольшой статье, я покажу, как можно создать своего бота на языке Java и что это довольно интересно и несложно.
+
+Мы будем использовать [библиотеку для работы с Telegram Bots API](https://github.com/rubenlagus/TelegramBots)
+и ее [расширение](https://github.com/rubenlagus/TelegramBots/blob/master/telegrambots-extensions/src/main/java/org/telegram/telegrambots/extensions/bots/commandbot/TelegramLongPollingCommandBot.java),
+позволяющее создавать свои команды ('`/custom_cmd`') и обрабатывать их простым способом.
+
+
 ## Создание нового проекта и подготовка
 ### 1. Добавление зависимостей в проект
 Создадим новый maven-проект и отредактируем `pom.xml`, добавив в него необходимые зависимости: 
@@ -61,7 +70,7 @@
 
 </project>
 ``` 
-* `Telegram API` - [библиотека для работы с Telegram API](https://github.com/rubenlagus/TelegramBots),
+* `Telegram API` - [библиотека для работы с Telegram Bots API](https://github.com/rubenlagus/TelegramBots),
     содержит в себе классы и методы для взаимодействия с сервисами Telegram и некоторые расширения
     этих классов.
 * `Log4j 2` - логгер. Основные возможности `log4j2`, которые я использую, это:
@@ -903,6 +912,5 @@ public final class BotInitializer {
 
 ![bot/pendalf](images/anonymizerbot/pendalf.jpg)
 ![bot/chuck_norris](images/anonymizerbot/chuck.jpg)
-
-Ну и куда же без логов:
+</br>
 ![bot/logs](images/anonymizerbot/bot_log.png)
