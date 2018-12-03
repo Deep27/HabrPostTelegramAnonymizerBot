@@ -9,6 +9,8 @@
 и ее [расширение](https://github.com/rubenlagus/TelegramBots/blob/master/telegrambots-extensions/src/main/java/org/telegram/telegrambots/extensions/bots/commandbot/TelegramLongPollingCommandBot.java),
 позволяющее создавать свои команды ('`/custom_cmd`') и обрабатывать их простым способом.
 
+Задачей бота будет являться регистрация пользователя и отправка сообщения от указанного им имени другим пользователям
+бота. 
 
 ## Создание нового проекта и подготовка
 ### 1. Добавление зависимостей в проект
