@@ -103,7 +103,7 @@
     </Appenders>
 
     <Loggers>
-        <Logger name="io.deep27soft.deepanonymizerbot" level="info" additivity="false">
+        <Logger name="io.example.anonymizerbot" level="info" additivity="false">
             <AppenderRef ref="Console"/>
         </Logger>
     </Loggers>
