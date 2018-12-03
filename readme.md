@@ -108,19 +108,17 @@
     
 ### 3. Создание аккаунта для бота
 Для этого нам необходимо обратиться за помощью к боту BotFather:
-* найдем бота в поиске;
-
-![botfather/welcome](images/botfather/welcome.jpg)
+* найдем бота в поиске; 
 * выполним команду `/start`;
-* выполним команду `/newbot`;
-
-![botfather/newbot](images/botfather/newbot.jpg)
-* зададим какое-нибудь имя нашему боту (должно заканчиваться на "Bot"). Я назвал его ExampleOfAnonymizerBot.
-
-![botfather/newbot_setname](images/botfather/newbot_setname.jpg)
+* выполним команду `/newbot`; 
+* зададим какое-нибудь имя нашему боту (должно заканчиваться на "Bot"). Я назвал его ExampleOfAnonymizerBot. 
 
 После выполнения этих команд мы получим токен, который нам понадобится для использования Bot API.
 (`7xxxxxxx2:Axxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx0`)
+
+![botfather/welcome](images/botfather/welcome.jpg)
+![botfather/newbot](images/botfather/newbot.jpg)
+![botfather/newbot_setname](images/botfather/newbot_setname.jpg)
     
 ## Реализация
 ### 1. Модель анонимного отправителя сообщений
