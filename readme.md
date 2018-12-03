@@ -120,7 +120,7 @@
 ![botfather/newbot_setname](images/botfather/newbot_setname.jpg)
 
 После выполнения этих команд мы получим токен, который нам понадобится для использования Bot API.
-(`749430772:AAF54VXPZeGRgFWmjCto-c8EIm7Ydk_VCW0`)
+(`7xxxxxxx2:Axxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx0`)
     
 ## Реализация
 ### 1. Модель анонимного отправителя сообщений
