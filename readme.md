@@ -573,13 +573,32 @@ public final class StopCommand extends AnonymizerCommand {
     <summary>AnonymizerBot.java</summary>
     
 ```java 
+package io.example.anonymizerbot.bot;
+
+import io.example.anonymizerbot.command.*;
+import io.example.anonymizerbot.logger.LogLevel;
+import io.example.anonymizerbot.logger.LogTemplate;
+import io.example.anonymizerbot.model.Anonymous;
+import io.example.anonymizerbot.service.AnonymousService;
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.telegram.telegrambots.bots.DefaultBotOptions;
+import org.telegram.telegrambots.extensions.bots.commandbot.TelegramLongPollingCommandBot;
+import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
+import org.telegram.telegrambots.meta.api.objects.Message;
+import org.telegram.telegrambots.meta.api.objects.Update;
+import org.telegram.telegrambots.meta.api.objects.User;
+import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
+
+import java.util.stream.Stream;
+
 public final class AnonymizerBot extends TelegramLongPollingCommandBot {
 
     private static final Logger LOG = LogManager.getLogger(AnonymizerBot.class);
 
     // имя бота, которое мы указали при создании аккаунта у BotFather
     // и токен, который получили в результате
-    // (правильнее будет выносить подобные данные в явном виде за пределы кода)
     private static final String BOT_NAME = "AnonymizerBotExample";
     private static final String BOT_TOKEN = "749430772:AAF54VXPZeGRgFWmjCto-c8EIm7Ydk_VCW0";
 
@@ -721,6 +740,7 @@ public final class AnonymizerBot extends TelegramLongPollingCommandBot {
         }
     }
 }
+
 ```
 </details>
 
@@ -732,11 +752,21 @@ public final class AnonymizerBot extends TelegramLongPollingCommandBot {
     <summary>BotInitializer.java</summary>
     
 ```java
+package io.example.anonymizerbot;
+
+import io.example.anonymizerbot.bot.AnonymizerBot;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.telegram.telegrambots.ApiContextInitializer;
+import org.telegram.telegrambots.bots.DefaultBotOptions;
+import org.telegram.telegrambots.meta.ApiContext;
+import org.telegram.telegrambots.meta.TelegramBotsApi;
+import org.telegram.telegrambots.meta.exceptions.TelegramApiRequestException;
+
 public final class BotInitializer {
 
     private static final Logger LOG = LogManager.getLogger(BotInitializer.class);
 
-    // (правильнее будет выносить подобные данные в явном виде за пределы кода)
     private static final String PROXY_HOST = "80.11.200.161";
     private static final int PROXY_PORT = 9999;
 
@@ -766,6 +796,7 @@ public final class BotInitializer {
         }
     }
 }
+
 ``` 
 </details>
 
