@@ -56,17 +56,7 @@
             <version>LATEST</version>
         </dependency>
 
-        <!-- Log4j 2 -->
-        <dependency>
-            <groupId>org.apache.logging.log4j</groupId>
-            <artifactId>log4j-api</artifactId>
-            <version>2.11.1</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.logging.log4j</groupId>
-            <artifactId>log4j-core</artifactId>
-            <version>2.11.1</version>
-        </dependency>
+        ...
 
     </dependencies>
 
@@ -75,49 +65,9 @@
 * `Telegram API` - [библиотека для работы с Telegram Bots API](https://github.com/rubenlagus/TelegramBots),
     содержит в себе классы и методы для взаимодействия с сервисами Telegram и некоторые расширения
     этих классов.
-* `Log4j 2` - логгер. Основные возможности `log4j2`, которые я использую, это:
-    * определение своих уровней логирования и их приоритетов;
-    * определение своего цвета текста для каждого уровня логирования;
-    * параллельный вывод логов в консоль и файл.
-</details>
+</details> 
     
-### 2. Настройка log4j2
-Хорошим тоном считается использование в проектах логгеров, а не `System.out.println()`.
-Создадим новый файл с настройками `log4j2` в `src/main/java/resources` с именем `log4j2.xml`:
-<details>
-    <summary>log4j2.xml</summary>
-
-```xml
-<?xml version="1.0" encoding="UTF-8" ?>
-<Configuration status="WARN">
-
-    <CustomLevels>
-        <CustomLevel name="STRANGE" intLevel="360"/>
-        <CustomLevel name="SUCCESS" intLevel="340"/>
-    </CustomLevels>
-
-    <Appenders>
-        <Console name="Console" target="SYSTEM_OUT">
-            <PatternLayout pattern="%highlight{%d{HH:mm:ss} [%t] %-5level %logger{36} - %msg%n}{STRANGE=bright yellow bold, SUCCESS=bright green bold}"/>
-        </Console>
-    </Appenders>
-
-    <Loggers>
-        <Logger name="io.example.anonymizerbot" level="info" additivity="false">
-            <AppenderRef ref="Console"/>
-        </Logger>
-    </Loggers>
-
-    <Root>
-        <Appender ref="Console"/>
-    </Root>
-
-</Configuration>
-```
-Информацию о настройке и использовании `log4j2` можно найти в [официальной документации](https://logging.apache.org/log4j/2.x/).
-</details>
-    
-### 3. Создание аккаунта для бота
+### 2. Создание аккаунта для бота
 Для этого нам необходимо обратиться за помощью к боту BotFather:
 * найдем бота в поиске; 
 * выполним команду `/start`;
@@ -184,8 +134,7 @@ public final class Anonymous {
     public void setDisplayedName(String displayedName) {
         mDisplayedName = displayedName;
     }
-}
-
+} 
 ```
 </details> 
 
@@ -196,8 +145,9 @@ public final class Anonymous {
     <summary>Anonymouses.java</summary> 
     
 ```java
-package io.example.anonymizerbot.model;
+package io.example.anonymizerbot.service;
 
+import io.example.anonymizerbot.model.Anonymous;
 import org.telegram.telegrambots.meta.api.objects.User;
 
 import java.util.HashSet;
@@ -205,22 +155,22 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Stream;
 
-public final class Anonymouses {
+public final class AnonymousService {
 
     private final Set<Anonymous> mAnonymouses;
 
-    public Anonymouses() {
+    public AnonymousService() {
         mAnonymouses = new HashSet<>();
     }
 
-    public boolean setUserDisplayedName(User user, String name) { 
+    public boolean setUserDisplayedName(User user, String name) {
 
-        if (isDisplayedNameTaken(name)) {
-            return false;
+        if (!isDisplayedNameTaken(name)) {
+            mAnonymouses.stream().filter(a -> a.getUser().equals(user)).forEach(a -> a.setDisplayedName(name));
+            return true;
         }
-        
-        mAnonymouses.stream().filter(a -> a.getUser().equals(user)).forEach(a -> a.setDisplayedName(name));
-        return true;
+
+        return false;
     }
 
     public boolean removeAnonymous(User user) {
@@ -231,13 +181,13 @@ public final class Anonymouses {
         return mAnonymouses.add(anonymous);
     }
 
-    public boolean hasAnonymous(User u) {
-        return mAnonymouses.stream().anyMatch(a -> a.getUser().equals(u));
+    public boolean hasAnonymous(User user) {
+        return mAnonymouses.stream().anyMatch(a -> a.getUser().equals(user));
     }
 
-    public String getDisplayedName(User u) {
+    public String getDisplayedName(User user) {
 
-        Anonymous anonymous = mAnonymouses.stream().filter(a -> a.getUser().equals(u)).findFirst().orElse(null);
+        Anonymous anonymous = mAnonymouses.stream().filter(a -> a.getUser().equals(user)).findFirst().orElse(null);
 
         if (anonymous == null) {
             return null;
@@ -248,7 +198,6 @@ public final class Anonymouses {
     public Stream<Anonymous> anonymouses() {
         return mAnonymouses.stream();
     }
-
 
     private boolean isDisplayedNameTaken(String name) {
         return mAnonymouses.stream().anyMatch(a -> Objects.equals(a.getDisplayedName(), name));
@@ -297,58 +246,16 @@ abstract class AnonymizerCommand extends BotCommand {
     void execute(AbsSender sender, SendMessage message, User user) {
         try {
             sender.execute(message);
-            log.log(Level.getLevel(LogLevel.SUCCESS), LogTemplate.COMMAND_SUCCESS, user.getId(), getCommandIdentifier());
+            log.log(Level.getLevel(LogLevel.SUCCESS.getValue()), LogTemplate.COMMAND_SUCCESS.getTemplate(), user.getId(), getCommandIdentifier());
         } catch (TelegramApiException e) {
-            log.error(LogTemplate.COMMAND_EXCEPTION, user.getId(), getCommandIdentifier(), e);
+            log.error(LogTemplate.COMMAND_EXCEPTION.getTemplate(), user.getId(), getCommandIdentifier(), e);
         }
     }
 } 
 ``` 
 </details>
 
-</br>
-
-В методах логгера используются уровни (`Level`) и шаблоны сообщений (`LogTemplate`):
-<details>
-    <summary>LogLevel.java</summary>
-    
-```java
-package io.example.anonymizerbot.logger;
-
-public final class LogLevel {
-
-    public static final String STRANGE = "STRANGE";
-    public static final String SUCCESS = "SUCCESS";
-
-    private LogLevel() {}
-} 
-```
-</details>
-
-<details>
-    <summary>LogTemplate.java</summary>
-    
-```java
-package io.example.anonymizerbot.logger;
-
-public final class LogTemplate {
-
-    public static final String MESSAGE_EXCEPTION = "User {} has caused an exception while sending message!";
-    public static final String MESSAGE_PROCESSING = "Precessing user {}'s message.";
-    public static final String MESSAGE_RECEIVED = "User {} has received message from another user {}.";
-    public static final String MESSAGE_LOST = "User {} did not get message from another user {}.";
-    public static final String MESSAGE_SENT = "User {} sent message to other users: \"{}\"."; 
-
-    public static final String COMMAND_PROCESSING = "User {} is executing '{}' command...";
-    public static final String COMMAND_SUCCESS = "User {} has successfully executed '{}' command.";
-    public static final String COMMAND_EXCEPTION = "User {} command '{}' has caused an exception!";
-
-    private LogTemplate() {}
-} 
-```
-</details>
-
-</br>
+</br> 
 
 Определим команды, на которые наш бот будет реагировать:
 - `/start` - создаст нового `Anonymous` без имени и добавит его в коллекцию `Anonymouses`;
@@ -361,7 +268,7 @@ package io.example.anonymizerbot.command;
 import io.example.anonymizerbot.logger.LogLevel;
 import io.example.anonymizerbot.logger.LogTemplate;
 import io.example.anonymizerbot.model.Anonymous;
-import io.example.anonymizerbot.model.Anonymouses;
+import io.example.anonymizerbot.service.AnonymousService;
 import org.apache.logging.log4j.Level;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Chat;
@@ -370,11 +277,11 @@ import org.telegram.telegrambots.meta.bots.AbsSender;
 
 public final class StartCommand extends AnonymizerCommand {
 
-    private final Anonymouses mAnonymouses;
+    private final AnonymousService mAnonymouses;
 
     // обязательно нужно вызвать конструктор суперкласса,
     // передав в него имя и описание команды
-    public StartCommand(Anonymouses anonymouses) {
+    public StartCommand(AnonymousService anonymouses) {
         super("start", "start using bot\n");
         mAnonymouses = anonymouses;
     }
@@ -389,11 +296,10 @@ public final class StartCommand extends AnonymizerCommand {
     @Override
     public void execute(AbsSender absSender, User user, Chat chat, String[] strings) {
 
-        log.info(LogTemplate.COMMAND_PROCESSING, user.getId(), getCommandIdentifier());
+        log.info(LogTemplate.COMMAND_PROCESSING.getTemplate(), user.getId(), getCommandIdentifier());
 
         StringBuilder sb = new StringBuilder();
-    
-        // объект сообщения, который передается методу AbsSender.execute
+
         SendMessage message = new SendMessage();
         message.setChatId(chat.getId().toString());
 
@@ -402,7 +308,7 @@ public final class StartCommand extends AnonymizerCommand {
             sb.append("Hi, ").append(user.getUserName()).append("! You've been added to bot users' list!\n")
                     .append("Please execute command:\n'/set_name <displayed_name>'\nwhere <displayed_name> is the name you want to use to hide your real name.");
         } else {
-            log.log(Level.getLevel(LogLevel.STRANGE), "User {} has already executed '{}'. Is he trying to do it one more time?", user.getId(), getCommandIdentifier());
+            log.log(Level.getLevel(LogLevel.STRANGE.getValue()), "User {} has already executed '{}'. Is he trying to do it one more time?", user.getId(), getCommandIdentifier());
             sb.append("You've already started bot! You can send messages if you set your name (/set_name).");
         }
 
@@ -442,7 +348,7 @@ public final class HelpCommand extends AnonymizerCommand {
     @Override
     public void execute(AbsSender absSender, User user, Chat chat, String[] strings) {
 
-        log.info(LogTemplate.COMMAND_PROCESSING, user.getId(), getCommandIdentifier());
+        log.info(LogTemplate.COMMAND_PROCESSING.getTemplate(), user.getId(), getCommandIdentifier());
 
         StringBuilder helpMessageBuilder = new StringBuilder("<b>Available commands:</b>\n\n");
 
@@ -470,7 +376,7 @@ package io.example.anonymizerbot.command;
 
 import io.example.anonymizerbot.logger.LogLevel;
 import io.example.anonymizerbot.logger.LogTemplate;
-import io.example.anonymizerbot.model.Anonymouses;
+import io.example.anonymizerbot.service.AnonymousService;
 import org.apache.logging.log4j.Level;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Chat;
@@ -479,9 +385,9 @@ import org.telegram.telegrambots.meta.bots.AbsSender;
 
 public final class SetNameCommand extends AnonymizerCommand {
 
-    private final Anonymouses mAnonymouses;
+    private final AnonymousService mAnonymouses;
 
-    public SetNameCommand(Anonymouses anonymouses) {
+    public SetNameCommand(AnonymousService anonymouses) {
         super("set_name", "set or change name that will be displayed with your messages\n");
         mAnonymouses = anonymouses;
     }
@@ -489,13 +395,13 @@ public final class SetNameCommand extends AnonymizerCommand {
     @Override
     public void execute(AbsSender absSender, User user, Chat chat, String[] strings) {
 
-        log.info(LogTemplate.COMMAND_PROCESSING, user.getId(), getCommandIdentifier());
+        log.info(LogTemplate.COMMAND_PROCESSING.getTemplate(), user.getId(), getCommandIdentifier());
 
         SendMessage message = new SendMessage();
         message.setChatId(chat.getId().toString());
 
         if (!mAnonymouses.hasAnonymous(user)) {
-            log.log(Level.getLevel(LogLevel.STRANGE), "User {} is trying to execute '{}' without starting the bot!", user.getId(), getCommandIdentifier());
+            log.log(Level.getLevel(LogLevel.STRANGE.getValue()), "User {} is trying to execute '{}' without starting the bot!", user.getId(), getCommandIdentifier());
             message.setText("Firstly you should start the bot! Execute '/start' command!");
             execute(absSender, message, user);
             return;
@@ -504,7 +410,7 @@ public final class SetNameCommand extends AnonymizerCommand {
         String displayedName = getName(strings);
 
         if (displayedName == null) {
-            log.log(Level.getLevel(LogLevel.STRANGE), "User {} is trying to set empty name.", user.getId());
+            log.log(Level.getLevel(LogLevel.STRANGE.getValue()), "User {} is trying to set empty name.", user.getId());
             message.setText("You should use non-empty name!");
             execute(absSender, message, user);
             return;
@@ -523,7 +429,7 @@ public final class SetNameCommand extends AnonymizerCommand {
                 sb.append("Your new displayed name: '").append(displayedName).append("'.");
             }
         } else {
-            log.log(Level.getLevel(LogLevel.STRANGE), "User {} is trying to set taken name '{}'", user.getId(), displayedName);
+            log.log(Level.getLevel(LogLevel.STRANGE.getValue()), "User {} is trying to set taken name '{}'", user.getId(), displayedName);
             sb.append("Name ").append(displayedName).append(" is already in use! Choose another name!");
         }
 
@@ -538,7 +444,7 @@ public final class SetNameCommand extends AnonymizerCommand {
         }
 
         String name = String.join(" ", strings);
-        return name.replaceAll(" ", "").length() == 0 ? null : name;
+        return name.replaceAll(" ", "").isEmpty() ? null : name;
     }
 } 
 ```
@@ -555,7 +461,7 @@ package io.example.anonymizerbot.command;
 
 import io.example.anonymizerbot.logger.LogLevel;
 import io.example.anonymizerbot.logger.LogTemplate;
-import io.example.anonymizerbot.model.Anonymouses;
+import io.example.anonymizerbot.service.AnonymousService;
 import org.apache.logging.log4j.Level;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Chat;
@@ -564,9 +470,9 @@ import org.telegram.telegrambots.meta.bots.AbsSender;
 
 public final class MyNameCommand extends AnonymizerCommand {
 
-    private final Anonymouses mAnonymouses;
+    private final AnonymousService mAnonymouses;
 
-    public MyNameCommand(Anonymouses anonymouses) {
+    public MyNameCommand(AnonymousService anonymouses) {
         super("my_name", "show your current name that will be displayed with your messages\n");
         mAnonymouses = anonymouses;
     }
@@ -574,7 +480,7 @@ public final class MyNameCommand extends AnonymizerCommand {
     @Override
     public void execute(AbsSender absSender, User user, Chat chat, String[] strings) {
 
-        log.info(LogTemplate.COMMAND_PROCESSING, user.getId(), getCommandIdentifier());
+        log.info(LogTemplate.COMMAND_PROCESSING.getTemplate(), user.getId(), getCommandIdentifier());
 
         StringBuilder sb = new StringBuilder();
 
@@ -584,12 +490,12 @@ public final class MyNameCommand extends AnonymizerCommand {
         if (!mAnonymouses.hasAnonymous(user)) {
 
             sb.append("You are not in bot users' list! Send /start command!");
-            log.log(Level.getLevel(LogLevel.STRANGE), "User {} is trying to execute '{}' without starting the bot.", user.getId(), getCommandIdentifier());
+            log.log(Level.getLevel(LogLevel.STRANGE.getValue()), "User {} is trying to execute '{}' without starting the bot.", user.getId(), getCommandIdentifier());
 
         } else if(mAnonymouses.getDisplayedName(user) == null) {
 
             sb.append("Currently you don't have a name.\nSet it using command:\n'/set_name <displayed_name>'");
-            log.log(Level.getLevel(LogLevel.STRANGE), "User {} is trying to execute '{}' without having a name.", user.getId(), getCommandIdentifier());
+            log.log(Level.getLevel(LogLevel.STRANGE.getValue()), "User {} is trying to execute '{}' without having a name.", user.getId(), getCommandIdentifier());
 
         } else {
 
@@ -615,7 +521,7 @@ package io.example.anonymizerbot.command;
 
 import io.example.anonymizerbot.logger.LogLevel;
 import io.example.anonymizerbot.logger.LogTemplate;
-import io.example.anonymizerbot.model.Anonymouses;
+import io.example.anonymizerbot.service.AnonymousService;
 import org.apache.logging.log4j.Level;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Chat;
@@ -624,9 +530,9 @@ import org.telegram.telegrambots.meta.bots.AbsSender;
 
 public final class StopCommand extends AnonymizerCommand {
 
-    private final Anonymouses mAnonymouses;
+    private final AnonymousService mAnonymouses;
 
-    public StopCommand(Anonymouses anonymouses) {
+    public StopCommand(AnonymousService anonymouses) {
         super("stop", "remove yourself from bot users' list\n");
         mAnonymouses = anonymouses;
     }
@@ -634,7 +540,7 @@ public final class StopCommand extends AnonymizerCommand {
     @Override
     public void execute(AbsSender absSender, User user, Chat chat, String[] strings) {
 
-        log.info(LogTemplate.COMMAND_PROCESSING, user.getId(), getCommandIdentifier());
+        log.info(LogTemplate.COMMAND_PROCESSING.getTemplate(), user.getId(), getCommandIdentifier());
 
         StringBuilder sb = new StringBuilder();
 
@@ -645,7 +551,7 @@ public final class StopCommand extends AnonymizerCommand {
             log.info("User {} has been removed from users list!", user.getId());
             sb.append("You've been removed from bot's users list! Bye!");
         } else {
-            log.log(Level.getLevel(LogLevel.STRANGE), "User {} is trying to execute '{}' without having executed 'start' before!", user.getId(), getCommandIdentifier());
+            log.log(Level.getLevel(LogLevel.STRANGE.getValue()), "User {} is trying to execute '{}' without having executed 'start' before!", user.getId(), getCommandIdentifier());
             sb.append("You were not in bot users' list. Bye!");
         }
 
@@ -667,36 +573,17 @@ public final class StopCommand extends AnonymizerCommand {
     <summary>AnonymizerBot.java</summary>
     
 ```java 
-package io.example.anonymizerbot.bot;
-
-import io.example.anonymizerbot.command.*;
-import io.example.anonymizerbot.logger.LogLevel;
-import io.example.anonymizerbot.logger.LogTemplate;
-import io.example.anonymizerbot.model.Anonymous;
-import io.example.anonymizerbot.model.Anonymouses;
-import org.apache.logging.log4j.Level;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.telegram.telegrambots.bots.DefaultBotOptions;
-import org.telegram.telegrambots.extensions.bots.commandbot.TelegramLongPollingCommandBot;
-import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
-import org.telegram.telegrambots.meta.api.objects.Message;
-import org.telegram.telegrambots.meta.api.objects.Update;
-import org.telegram.telegrambots.meta.api.objects.User;
-import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
-
-import java.util.stream.Stream;
-
 public final class AnonymizerBot extends TelegramLongPollingCommandBot {
 
     private static final Logger LOG = LogManager.getLogger(AnonymizerBot.class);
-    
-    // имя бота, которое мы указали при создании аккаунта у BotFather
-    // и токен, который получили в результате 
-    private static final String BOT_NAME = "AnonymizerBotExample";
-    private static final String BOT_TOKEN = "7xxxxxxx2:Axxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx0";
 
-    private final Anonymouses mAnonymouses;
+    // имя бота, которое мы указали при создании аккаунта у BotFather
+    // и токен, который получили в результате
+    // (правильнее будет выносить подобные данные в явном виде за пределы кода)
+    private static final String BOT_NAME = "AnonymizerBotExample";
+    private static final String BOT_TOKEN = "749430772:AAF54VXPZeGRgFWmjCto-c8EIm7Ydk_VCW0";
+
+    private final AnonymousService mAnonymouses;
 
     public AnonymizerBot(DefaultBotOptions botOptions) {
 
@@ -705,12 +592,12 @@ public final class AnonymizerBot extends TelegramLongPollingCommandBot {
         LOG.info("Initializing Anonymizer Bot...");
 
         LOG.info("Initializing anonymouses list...");
-        mAnonymouses = new Anonymouses();
+        mAnonymouses = new AnonymousService();
 
         // регистрация всех кастомных команд
         LOG.info("Registering commands...");
         LOG.info("Registering '/start'...");
-        register(new StartCommand(mAnonymouses));
+        register(new StartCommand( mAnonymouses));
         LOG.info("Registering '/set_name'...");
         register(new SetNameCommand(mAnonymouses));
         LOG.info("Registering '/stop'...");
@@ -725,7 +612,7 @@ public final class AnonymizerBot extends TelegramLongPollingCommandBot {
         LOG.info("Registering default action'...");
         registerDefaultAction(((absSender, message) -> {
 
-            LOG.log(Level.getLevel(LogLevel.STRANGE), "User {} is trying to execute unknown command '{}'.", message.getFrom().getId(), message.getText());
+            LOG.log(Level.getLevel(LogLevel.STRANGE.getValue()), "User {} is trying to execute unknown command '{}'.", message.getFrom().getId(), message.getText());
 
             SendMessage text = new SendMessage();
             text.setChatId(message.getChatId());
@@ -734,7 +621,7 @@ public final class AnonymizerBot extends TelegramLongPollingCommandBot {
             try {
                 absSender.execute(text);
             } catch (TelegramApiException e) {
-                e.printStackTrace();
+                LOG.error("Error while replying unknown command to user {}.", message.getFrom(), e);
             }
 
             helpCommand.execute(absSender, message.getFrom(), message.getChat(), new String[] {});
@@ -760,7 +647,7 @@ public final class AnonymizerBot extends TelegramLongPollingCommandBot {
         Message msg = update.getMessage();
         User user = msg.getFrom();
 
-        LOG.info(LogTemplate.MESSAGE_PROCESSING, user.getId());
+        LOG.info(LogTemplate.MESSAGE_PROCESSING.getTemplate(), user.getId());
 
         if (!canSendMessage(user, msg)) {
             return;
@@ -770,12 +657,11 @@ public final class AnonymizerBot extends TelegramLongPollingCommandBot {
         String messageForUsers = String.format("%s:\n%s", mAnonymouses.getDisplayedName(user), msg.getText());
 
         SendMessage answer = new SendMessage();
-        
+
         // отправка ответа отправителю о том, что его сообщение получено
         answer.setText(clearMessage);
         answer.setChatId(msg.getChatId());
         replyToUser(answer, user, clearMessage);
-
 
         // отправка сообщения всем остальным пользователям бота
         answer.setText(messageForUsers);
@@ -794,21 +680,21 @@ public final class AnonymizerBot extends TelegramLongPollingCommandBot {
         answer.setChatId(msg.getChatId());
 
         if (!msg.hasText() || msg.getText().trim().length() == 0) {
-            LOG.log(Level.getLevel(LogLevel.STRANGE), "User {} is trying to send empty message!", user.getId());
+            LOG.log(Level.getLevel(LogLevel.STRANGE.getValue()), "User {} is trying to send empty message!", user.getId());
             answer.setText("You shouldn't send empty messages!");
             replyToUser(answer, user, msg.getText());
             return false;
         }
 
         if(!mAnonymouses.hasAnonymous(user)) {
-            LOG.log(Level.getLevel(LogLevel.STRANGE), "User {} is trying to send message without starting the bot!", user.getId());
+            LOG.log(Level.getLevel(LogLevel.STRANGE.getValue()), "User {} is trying to send message without starting the bot!", user.getId());
             answer.setText("Firstly you should start bot! Use /start command!");
             replyToUser(answer, user, msg.getText());
             return false;
         }
 
         if (mAnonymouses.getDisplayedName(user) == null) {
-            LOG.log(Level.getLevel(LogLevel.STRANGE), "User {} is trying to send message without setting a name!", user.getId());
+            LOG.log(Level.getLevel(LogLevel.STRANGE.getValue()), "User {} is trying to send message without setting a name!", user.getId());
             answer.setText("You must set a name before sending messages.\nUse '/set_name <displayed_name>' command.");
             replyToUser(answer, user, msg.getText());
             return false;
@@ -820,21 +706,21 @@ public final class AnonymizerBot extends TelegramLongPollingCommandBot {
     private void sendMessageToUser(SendMessage message, User receiver, User sender) {
         try {
             execute(message);
-            LOG.log(Level.getLevel(LogLevel.SUCCESS), LogTemplate.MESSAGE_RECEIVED, receiver.getId(), sender.getId());
+            LOG.log(Level.getLevel(LogLevel.SUCCESS.getValue()), LogTemplate.MESSAGE_RECEIVED.getTemplate(), receiver.getId(), sender.getId());
         } catch (TelegramApiException e) {
-            LOG.error(LogTemplate.MESSAGE_LOST, receiver.getId(), sender.getId(), e);
+            LOG.error(LogTemplate.MESSAGE_LOST.getTemplate(), receiver.getId(), sender.getId(), e);
         }
     }
 
     private void replyToUser(SendMessage message, User user, String messageText) {
         try {
             execute(message);
-            LOG.log(Level.getLevel(LogLevel.SUCCESS), LogTemplate.MESSAGE_SENT, user.getId(), messageText);
+            LOG.log(Level.getLevel(LogLevel.SUCCESS.getValue()), LogTemplate.MESSAGE_SENT.getTemplate(), user.getId(), messageText);
         } catch (TelegramApiException e) {
-            LOG.error(LogTemplate.MESSAGE_EXCEPTION, user.getId(), e);
+            LOG.error(LogTemplate.MESSAGE_EXCEPTION.getTemplate(), user.getId(), e);
         }
     }
-} 
+}
 ```
 </details>
 
@@ -846,24 +732,13 @@ public final class AnonymizerBot extends TelegramLongPollingCommandBot {
     <summary>BotInitializer.java</summary>
     
 ```java
-package io.example.anonymizerbot;
-
-import io.example.anonymizerbot.bot.AnonymizerBot;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.telegram.telegrambots.ApiContextInitializer;
-import org.telegram.telegrambots.bots.DefaultBotOptions;
-import org.telegram.telegrambots.meta.ApiContext;
-import org.telegram.telegrambots.meta.TelegramBotsApi;
-import org.telegram.telegrambots.meta.exceptions.TelegramApiRequestException;
-
 public final class BotInitializer {
 
     private static final Logger LOG = LogManager.getLogger(BotInitializer.class);
 
-    // адрес прокси
-    private final static String PROXY_HOST = "xxx.xxx.xxx.xxx";
-    private final static int PROXY_PORT = 9999;
+    // (правильнее будет выносить подобные данные в явном виде за пределы кода)
+    private static final String PROXY_HOST = "80.11.200.161";
+    private static final int PROXY_PORT = 9999;
 
     public static void main(String[] args) {
 
@@ -874,9 +749,9 @@ public final class BotInitializer {
 
             TelegramBotsApi botsApi = new TelegramBotsApi();
 
-            // из настроек нужны только настройки прокси
             LOG.info("Configuring bot options...");
-            DefaultBotOptions botOptions = ApiContext.getInstance(DefaultBotOptions.class); 
+            DefaultBotOptions botOptions = ApiContext.getInstance(DefaultBotOptions.class);
+
             botOptions.setProxyHost(PROXY_HOST);
             botOptions.setProxyPort(PROXY_PORT);
             botOptions.setProxyType(DefaultBotOptions.ProxyType.SOCKS4);
@@ -890,7 +765,7 @@ public final class BotInitializer {
             LOG.error("Error while initializing bot!", e);
         }
     }
-} 
+}
 ``` 
 </details>
 
