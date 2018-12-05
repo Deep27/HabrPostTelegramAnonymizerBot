@@ -58,8 +58,9 @@
 
     </project>
     </source>
-    * `Telegram API` - [библиотека для работы с Telegram Bots API](https://github.com/rubenlagus/TelegramBots), содержит в себе классы и методы для взаимодействия с сервисами Telegram и некоторые расширения этих классов.
 </spoiler>
+
+Telegram API - <a href="https://github.com/rubenlagus/TelegramBots">библиотека для работы с Telegram Bots API</a>, содержит в себе классы и методы для взаимодействия с сервисами Telegram и некоторые расширения этих классов.
 
 <h3>2. Создание аккаунта для бота</h3>
 Для этого нам необходимо обратиться за помощью к боту BotFather:
@@ -84,7 +85,7 @@
 - User mUser - информация о пользователе Telegram;
 - Chat mChat - информация о чате пользователя и бота;
 - String mDisplayedName - имя, от которого пользователь будет посылать сообщения другим пользователям бота.
-<br/>
+
 <spoiler title="Anonymous.java">
     <source lang="java">
 package io.example.anonymizerbot.model;
@@ -244,8 +245,8 @@ abstract class AnonymizerCommand extends BotCommand {
 </spoiler>
 
 Определим команды, на которые наш бот будет реагировать:
-1. `/start` - создаст нового `Anonymous` без имени и добавит его в коллекцию `Anonymouses`;
-<br/>
+- `/start` - создаст нового `Anonymous` без имени и добавит его в коллекцию `Anonymouses`;
+
 <spoiler title="StartCommand.java">
     <source lang="java">
 package io.example.anonymizerbot.command;
@@ -303,10 +304,10 @@ public final class StartCommand extends AnonymizerCommand {
 }
     </source>
 </spoiler>
-<br/>
-2. `/help` - выведет пользователю информацию обо всех доступных командах (конструктор отличается
+
+- `/help` - выведет пользователю информацию обо всех доступных командах (конструктор отличается
 от других тем, что в него необходимо передать `ICommandRegistry`, который содержит все кастомные команды);
-<br/>
+
 <spoiler title="HelpCommand.java">
     <source lang="java">
 package io.example.anonymizerbot.command;
@@ -347,8 +348,8 @@ public final class HelpCommand extends AnonymizerCommand {
     </source>
 </spoiler>
 
-3. `/set_name` - задаст пользователю имя, от которого будут отправляться анонимные сообщения;
-<br/>
+- `/set_name` - задаст пользователю имя, от которого будут отправляться анонимные сообщения;
+
 <spoiler title="SetNameCommand.java">
     <source lang="java">
 package io.example.anonymizerbot.command;
@@ -428,10 +429,9 @@ public final class SetNameCommand extends AnonymizerCommand {
 }
     </source>
 </spoiler>
-<br/>
 
-4. `/my_name` - отобразит текущее имя пользователя;
-<br/>
+- `/my_name` - отобразит текущее имя пользователя;
+
 <spoiler title="MyNameCommand.java">
     <source lang="java">
 package io.example.anonymizerbot.command;
@@ -486,10 +486,9 @@ public final class MyNameCommand extends AnonymizerCommand {
 }
     </source>
 </spoiler>
-<br/>
 
-5. `/stop` - удалит пользователя из коллекции анонимусов.
-<br/>
+- `/stop` - удалит пользователя из коллекции анонимусов.
+
 <spoiler title="StopCommand.java">
     <source lang="java">
 package io.example.anonymizerbot.command;
@@ -536,12 +535,11 @@ public final class StopCommand extends AnonymizerCommand {
 }
     </source>
 </spoiler>
-<br/>
 
 <h3>3. Инициализация и запуск бота</h3>
 
 Класс бота, в котором производится регистрация всех кастомных команд, обработчика сообщений-не команд и неизвестных команд.
-<br/>
+
 <spoiler title="AnonymizerBot.java">
     <source lang="java">
 package io.example.anonymizerbot.bot;
@@ -713,9 +711,9 @@ public final class AnonymizerBot extends TelegramLongPollingCommandBot {
 }
         </source>
 </spoiler>
-<br/>
+
 Наконец, запуск бота:
-<br/>
+
 <spoiler title="BotInitializer.java">
     <source lang="java">
 package io.example.anonymizerbot;
@@ -764,7 +762,7 @@ public final class BotInitializer {
 }
     </source>
 </spoiler>
-<br/>
+
 Вот и все! Бот готов к первым тестам.
 
 <h2>Пример использования</h2>
